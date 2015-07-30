@@ -174,6 +174,7 @@ class DateAxisItem(AxisItem):
         # Set the zoom level to use depending on the time density on the axis
         self.utcOffset = time.timezone
         self.zoomLevel = YEAR_MONTH_ZOOM_LEVEL
+        self.dates = None
         # we need about 60pt for our largest label
         self.maxTicksPerPt = 1/60.0
         self.zoomLevels = {
@@ -188,9 +189,9 @@ class DateAxisItem(AxisItem):
     def tickStrings(self, values, scale, spacing):
         tickSpecs = self.zoomLevel.tickSpecs
         tickSpec = next((s for s in tickSpecs if s.spacing == spacing), None)
-        dates = [datetime.utcfromtimestamp(v - self.utcOffset) for v in values]
+        self.dates = [datetime.utcfromtimestamp(v - self.utcOffset) for v in values]
         formatStrings = []
-        for x in dates:
+        for x in self.dates:
             try:
                 if '%f' in tickSpec.format:
                     # we only support ms precision
@@ -213,3 +214,38 @@ class DateAxisItem(AxisItem):
         key = next((k for k in keys if density < k), keys[-1])
         self.zoomLevel = self.zoomLevels[key]
         self.zoomLevel.utcOffset = self.utcOffset
+
+    def getDateLabel(self):
+        if not self.dates:
+            return ''
+        zoomLevel = self.zoomLevel
+        # empty string
+        dateLabel = ''
+        if (zoomLevel == YEAR_MONTH_ZOOM_LEVEL and
+                self.dates[0].year != self.dates[-1].year):
+            return dateLabel
+        # year
+        dateLabel = self.dates[0].strftime('%Y')
+        if zoomLevel == YEAR_MONTH_ZOOM_LEVEL:
+            return dateLabel
+        if (zoomLevel == MONTH_DAY_ZOOM_LEVEL and
+                self.dates[0].month != self.dates[-1].month):
+            return dateLabel
+        # month, year
+        dateLabel = self.dates[0].strftime('%B %Y')
+        if zoomLevel == MONTH_DAY_ZOOM_LEVEL:
+            return dateLabel
+        if (zoomLevel == DAY_HOUR_ZOOM_LEVEL and
+                self.dates[0].day != self.dates[-1].day):
+            return dateLabel
+        # day, month, year
+        dateLabel = self.dates[0].strftime('%d ').lstrip('0') + dateLabel
+        if zoomLevel in [DAY_HOUR_ZOOM_LEVEL, HOUR_MINUTE_ZOOM_LEVEL,
+                         HMS_ZOOM_LEVEL]:
+            return dateLabel
+        if (zoomLevel == MS_ZOOM_LEVEL and
+                self.dates[0].minute != self.dates[-1].minute):
+            return dateLabel
+        # day, month, year, hours, minutes
+        dateLabel += ', ' + self.dates[0].strftime('%H:%M')
+        return dateLabel
