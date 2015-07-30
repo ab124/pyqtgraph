@@ -218,32 +218,31 @@ class DateAxisItem(AxisItem):
     def getDateLabel(self):
         if not self.dates:
             return ''
-        zoomLevel = self.zoomLevel
         # empty string
         dateLabel = ''
-        if (zoomLevel == YEAR_MONTH_ZOOM_LEVEL and
+        if (self.zoomLevel == YEAR_MONTH_ZOOM_LEVEL and
                 self.dates[0].year != self.dates[-1].year):
             return dateLabel
         # year
         dateLabel = self.dates[0].strftime('%Y')
-        if zoomLevel == YEAR_MONTH_ZOOM_LEVEL:
+        if self.zoomLevel == YEAR_MONTH_ZOOM_LEVEL:
             return dateLabel
-        if (zoomLevel == MONTH_DAY_ZOOM_LEVEL and
+        if (self.zoomLevel == MONTH_DAY_ZOOM_LEVEL and
                 self.dates[0].month != self.dates[-1].month):
             return dateLabel
         # month, year
         dateLabel = self.dates[0].strftime('%B %Y')
-        if zoomLevel == MONTH_DAY_ZOOM_LEVEL:
+        if self.zoomLevel == MONTH_DAY_ZOOM_LEVEL:
             return dateLabel
-        if (zoomLevel == DAY_HOUR_ZOOM_LEVEL and
+        if (self.zoomLevel == DAY_HOUR_ZOOM_LEVEL and
                 self.dates[0].day != self.dates[-1].day):
             return dateLabel
         # day, month, year
         dateLabel = self.dates[0].strftime('%d ').lstrip('0') + dateLabel
-        if zoomLevel in [DAY_HOUR_ZOOM_LEVEL, HOUR_MINUTE_ZOOM_LEVEL,
+        if self.zoomLevel in [DAY_HOUR_ZOOM_LEVEL, HOUR_MINUTE_ZOOM_LEVEL,
                          HMS_ZOOM_LEVEL]:
             return dateLabel
-        if (zoomLevel == MS_ZOOM_LEVEL and
+        if (self.zoomLevel == MS_ZOOM_LEVEL and
                 self.dates[0].minute != self.dates[-1].minute):
             return dateLabel
         # day, month, year, hours, minutes
